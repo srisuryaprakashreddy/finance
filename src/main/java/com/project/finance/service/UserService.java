@@ -1,11 +1,11 @@
+// service/UserService.java
 package com.project.finance.service;
 
 import com.project.finance.model.User;
 import com.project.finance.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -14,26 +14,27 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public User registerUser(User user) {
-        // Here you can add validations or password encoding
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
-    public User getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-//    public User getUserByUsername(String username) {
-//        return userRepository.findByUsername(username)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//    }
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-    public Optional<User> getUserByUsername(String username) {
+    public Optional<User> findByUsername(String username) {
         return userRepository.findByUsername(username);
     }
 
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 }

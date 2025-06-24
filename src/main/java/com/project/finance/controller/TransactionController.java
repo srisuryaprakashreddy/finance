@@ -1,14 +1,17 @@
+// controller/TransactionController.java
 package com.project.finance.controller;
 
 import com.project.finance.model.Transactions;
+import com.project.finance.model.User;
+import com.project.finance.model.Account;
 import com.project.finance.service.TransactionService;
 import com.project.finance.service.UserService;
+import com.project.finance.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/transactions")
@@ -20,28 +23,31 @@ public class TransactionController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private AccountService accountService;
+
     @GetMapping
-    public String showTransactions(@RequestParam Long userId, Model model) {
-        List<Transactions> transactions = transactionService.getTransactionsByUserId(userId);
-        model.addAttribute("transactions", transactions);
-        model.addAttribute("transaction", new Transactions());
-        model.addAttribute("userId", userId);
-        return "transactions"; // transactions.html for showing and adding transactions
+    public String transactions(Model model, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+
+        if (user != null) {
+            model.addAttribute("transactions", transactionService.getTransactionsByUser(user));
+            model.addAttribute("accounts", accountService.getAccountsByUser(user));
+            model.addAttribute("transaction", new Transactions());
+        }
+
+        return "transactions";
     }
 
-    @PostMapping
-    public String addTransaction(@RequestParam Long userId,
-                                 @RequestParam double amount,
-                                 @RequestParam String description,
-                                 @RequestParam String category,
-                                 @RequestParam String type,
-                                 @RequestParam(required = false) String userConsent,
-                                 Model model) {
-        String result = transactionService.processTransaction(userId, amount, description, category, type, userConsent);
-        if (result.startsWith("Warning")) {
-            model.addAttribute("warning", result);
-            return showTransactions(userId, model);
+    @PostMapping("/add")
+    public String addTransaction(@ModelAttribute Transactions transaction, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+
+        if (user != null) {
+            transaction.setUser(user);
+            transactionService.saveTransaction(transaction);
         }
-        return "redirect:/transactions?userId=" + userId;
+
+        return "redirect:/transactions";
     }
 }

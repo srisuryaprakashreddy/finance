@@ -1,15 +1,80 @@
+<!-- templates/dashboard.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+    <meta charset="UTF-8">
     <title>Dashboard</title>
+    <link rel="stylesheet" th:href="@{/static.css}">
 </head>
 <body>
-<h2>Welcome, <span th:text="${user.name}">User</span></h2>
-<div>
-    <p>Account Balance: ₹<span th:text="${account.balance}">0</span></p>
-    <p>Budget Remaining: ₹<span th:text="${budget.remainingBudget}">0</span></p>
-    <a th:href="@{/budget}">Set Budget</a> |
-    <a th:href="@{/transactions}">View Transactions</a>
+<div class="container">
+    <nav>
+        <ul>
+            <li><a th:href="@{/dashboard}">Dashboard</a></li>
+            <li><a th:href="@{/transactions}">Transactions</a></li>
+            <li><a th:href="@{/budget}">Budget</a></li>
+            <li><a th:href="@{/logout}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <h1>Welcome, <span th:text="${user.firstName}"></span>!</h1>
+
+    <div class="stats">
+        <div class="stat-card">
+            <h3>Total Balance</h3>
+            <p th:text="${totalBalance}">0.00</p>
+        </div>
+        <div class="stat-card">
+            <h3>Total Income</h3>
+            <p th:text="${totalIncome}">0.00</p>
+        </div>
+        <div class="stat-card">
+            <h3>Total Expenses</h3>
+            <p th:text="${totalExpenses}">0.00</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Accounts</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Type</th>
+                <th>Balance</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="account : ${accounts}">
+                <td th:text="${account.name}"></td>
+                <td th:text="${account.type}"></td>
+                <td th:text="${account.balance}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Recent Transactions</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Type</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="transaction : ${recentTransactions}">
+                <td th:text="${transaction.date}"></td>
+                <td th:text="${transaction.description}"></td>
+                <td th:text="${transaction.amount}"></td>
+                <td th:text="${transaction.type}"></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 </body>
 </html>

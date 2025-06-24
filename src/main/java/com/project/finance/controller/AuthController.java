@@ -1,12 +1,13 @@
+// controller/AuthController.java
 package com.project.finance.controller;
 
 import com.project.finance.model.User;
 import com.project.finance.service.UserService;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AuthController {
@@ -15,37 +16,30 @@ public class AuthController {
     private UserService userService;
 
     @GetMapping("/login")
-    public String showLoginForm() {
+    public String login() {
         return "login";
     }
 
-    @PostMapping("/login")
-    public String loginUser(@RequestParam String username,
-                            @RequestParam String password,
-                            HttpSession session,
-                            Model model) {
-
-        return userService.getUserByUsername(username)
-                .filter(user -> user.getPassword().equals(password))
-                .map(user -> {
-                    session.setAttribute("userId", user.getUserId());
-                    return "redirect:/dashboard" + user.getUserId();
-                })
-                .orElseGet(() -> {
-                    model.addAttribute("error", "Invalid credentials");
-                    return "login";
-                });
-    }
-
     @GetMapping("/register")
-    public String showRegisterForm(Model model) {
+    public String register(Model model) {
         model.addAttribute("user", new User());
-        return "register"; // should match `register.html` in templates
+        return "register";
     }
 
     @PostMapping("/register")
-    public String processRegister(@ModelAttribute User user) {
+    public String registerUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
+        if (userService.existsByUsername(user.getUsername())) {
+            redirectAttributes.addFlashAttribute("error", "Username already exists");
+            return "redirect:/register";
+        }
+
+        if (userService.existsByEmail(user.getEmail())) {
+            redirectAttributes.addFlashAttribute("error", "Email already exists");
+            return "redirect:/register";
+        }
+
         userService.registerUser(user);
+        redirectAttributes.addFlashAttribute("success", "Registration successful");
         return "redirect:/login";
     }
 }

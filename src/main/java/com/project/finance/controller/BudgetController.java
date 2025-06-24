@@ -1,14 +1,15 @@
+// controller/BudgetController.java
 package com.project.finance.controller;
 
 import com.project.finance.model.Budget;
+import com.project.finance.model.User;
 import com.project.finance.service.BudgetService;
 import com.project.finance.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/budget")
@@ -20,32 +21,34 @@ public class BudgetController {
     @Autowired
     private UserService userService;
 
-    // Display budget form with userId as query parameter
     @GetMapping
-    public String showBudgetForm(@RequestParam("userId") Long userId, Model model) {
-        Budget budget = budgetService.getBudgetByUserId(userId);
-        if (budget == null) {
-            budget = new Budget(); // new budget object if none found
+    public String budget(Model model, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+
+        if (user != null) {
+            model.addAttribute("budgets", budgetService.getBudgetsByUser(user));
+            model.addAttribute("budget", new Budget());
         }
 
-        model.addAttribute("budget", budget);
-        model.addAttribute("userId", userId);
-        return "budgetForm"; // Thymeleaf form view
+        return "budget";
     }
 
-    // Save or update budget and redirect to dashboard with userId
-    @PostMapping
-    public String saveBudget(@RequestParam("userId") Long userId,
-                             @RequestParam("budgetAmount") double budgetAmount,
-                             @RequestParam("startDate") String startDate,
-                             @RequestParam("endDate") String endDate) {
+    @PostMapping("/add")
+    public String addBudget(@ModelAttribute Budget budget, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
+        if (user != null) {
+            budget.setUser(user);
+            budget.setSpent(0.0);
+            budgetService.saveBudget(budget);
+        }
 
-        budgetService.createOrUpdateBudget(userId, budgetAmount, start, end);
+        return "redirect:/budget";
+    }
 
-        // Redirect back to dashboard, maintaining userId in query
-        return "redirect:/dashboard?userId=" + userId;
+    @GetMapping("/delete/{id}")
+    public String deleteBudget(@PathVariable Long id) {
+        budgetService.deleteBudget(id);
+        return "redirect:/budget";
     }
 }
