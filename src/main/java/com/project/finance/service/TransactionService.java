@@ -1,4 +1,4 @@
-// service/TransactionService.java
+// service/TransactionService.java (Updated)
 package com.project.finance.service;
 
 import com.project.finance.model.Transactions;
@@ -42,6 +42,24 @@ public class TransactionService {
 
     public Optional<Transactions> getTransactionById(Long id) {
         return transactionRepository.findById(id);
+    }
+
+    public void deleteTransaction(Long id) {
+        Optional<Transactions> transactionOpt = transactionRepository.findById(id);
+        if (transactionOpt.isPresent()) {
+            Transactions transaction = transactionOpt.get();
+            Account account = transaction.getAccount();
+
+            // Reverse the transaction effect on account balance
+            if ("INCOME".equals(transaction.getType())) {
+                account.setBalance(account.getBalance() - transaction.getAmount());
+            } else if ("EXPENSE".equals(transaction.getType())) {
+                account.setBalance(account.getBalance() + transaction.getAmount());
+            }
+
+            accountRepository.save(account);
+            transactionRepository.deleteById(id);
+        }
     }
 
     public Double getTotalIncome(User user) {

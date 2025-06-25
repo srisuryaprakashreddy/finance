@@ -1,4 +1,4 @@
-// controller/TransactionController.java
+// controller/TransactionController.java (Updated)
 package com.project.finance.controller;
 
 import com.project.finance.model.Transactions;
@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/transactions")
@@ -27,13 +28,27 @@ public class TransactionController {
     private AccountService accountService;
 
     @GetMapping
-    public String transactions(Model model, Authentication authentication) {
+    public String transactions(Model model, Authentication authentication,
+                               @RequestParam(required = false) Long accountId) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
 
         if (user != null) {
-            model.addAttribute("transactions", transactionService.getTransactionsByUser(user));
+            if (accountId != null) {
+                Account account = accountService.getAccountById(accountId).orElse(null);
+                if (account != null && account.getUser().equals(user)) {
+                    model.addAttribute("transactions", transactionService.getTransactionsByAccount(account));
+                    model.addAttribute("selectedAccount", account);
+                } else {
+                    model.addAttribute("transactions", transactionService.getTransactionsByUser(user));
+                }
+            } else {
+                model.addAttribute("transactions", transactionService.getTransactionsByUser(user));
+            }
+
             model.addAttribute("accounts", accountService.getAccountsByUser(user));
-            model.addAttribute("transaction", new Transactions());
+            Transactions newTransaction = new Transactions();
+            newTransaction.setDate(LocalDate.now());
+            model.addAttribute("transaction", newTransaction);
         }
 
         return "transactions";
@@ -48,6 +63,19 @@ public class TransactionController {
             transactionService.saveTransaction(transaction);
         }
 
+        return "redirect:/transactions";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteTransaction(@PathVariable Long id, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        if (user != null) {
+            transactionService.getTransactionById(id).ifPresent(transaction -> {
+                if (transaction.getUser().equals(user)) {
+                    transactionService.deleteTransaction(id);
+                }
+            });
+        }
         return "redirect:/transactions";
     }
 }

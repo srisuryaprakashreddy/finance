@@ -1,7 +1,8 @@
-// controller/DashboardController.java
+// controller/DashboardController.java (Updated)
 package com.project.finance.controller;
 
 import com.project.finance.model.User;
+import com.project.finance.model.Account;
 import com.project.finance.service.UserService;
 import com.project.finance.service.AccountService;
 import com.project.finance.service.TransactionService;
@@ -11,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 @Controller
 public class DashboardController {
@@ -39,9 +42,22 @@ public class DashboardController {
             model.addAttribute("totalExpenses", transactionService.getTotalExpenses(user));
             model.addAttribute("budgets", budgetService.getBudgetsByUser(user));
             model.addAttribute("recentTransactions", transactionService.getTransactionsByUser(user));
+            model.addAttribute("newAccount", new Account());
         }
 
         return "dashboard";
+    }
+
+    @PostMapping("/dashboard/add-account")
+    public String addAccountFromDashboard(@ModelAttribute("newAccount") Account account, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+
+        if (user != null) {
+            account.setUser(user);
+            accountService.saveAccount(account);
+        }
+
+        return "redirect:/dashboard";
     }
 
     @GetMapping("/")

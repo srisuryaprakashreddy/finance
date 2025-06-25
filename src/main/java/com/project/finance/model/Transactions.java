@@ -1,4 +1,4 @@
-// model/Transactions.java
+// model/Transactions.java (Updated)
 package com.project.finance.model;
 
 import jakarta.persistence.*;
@@ -17,6 +17,10 @@ public class Transactions {
     private String type;
     private LocalDate date;
 
+    // Add new field
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE") // OR @Column(nullable = true)
+    private Boolean isDebit;
+
     @ManyToOne
     @JoinColumn(name = "account_id")
     private Account account;
@@ -25,29 +29,80 @@ public class Transactions {
     @JoinColumn(name = "user_id")
     private User user;
 
-    public Transactions() {}
+    // Add getters/setters
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Double getAmount() { return amount; }
-    public void setAmount(Double amount) { this.amount = amount; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public Double getAmount() {
+        return amount;
+    }
 
-    public String getCategory() { return category; }
-    public void setCategory(String category) { this.category = category; }
+    public void setAmount(Double amount) {
+        this.amount = amount;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public String getDescription() {
+        return description;
+    }
 
-    public LocalDate getDate() { return date; }
-    public void setDate(LocalDate date) { this.date = date; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public Account getAccount() { return account; }
-    public void setAccount(Account account) { this.account = account; }
+    public String getCategory() {
+        return category;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public Boolean getDebit() {
+        return isDebit;
+    }
+
+    public void setDebit(Boolean debit) {
+        isDebit = debit;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Boolean getIsDebit() { return isDebit; }
+    public void setIsDebit(Boolean isDebit) { this.isDebit = isDebit; }
 }
