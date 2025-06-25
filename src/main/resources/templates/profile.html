@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="#">Expense Planner</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
+            <a class="nav-link" th:href="@{/accounts}">Accounts</a>
+            <a class="nav-link" th:href="@{/transactions}">Transactions</a>
+            <a class="nav-link" th:href="@{/budget}">Budgets</a>
+            <a class="nav-link" th:href="@{/transfer}">Transfer</a>
+            <a class="nav-link active" th:href="@{/user/profile}">Profile</a>
+            <a class="nav-link" th:href="@{/logout}">Logout</a>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <h2>Profile</h2>
+    <form th:action="@{/user/profile}" th:object="${user}" method="post" class="row g-3 shadow-sm p-3 bg-body rounded">
+        <div class="col-md-4">
+            <label>First Name</label>
+            <input type="text" th:field="*{firstName}" class="form-control"/>
+        </div>
+        <div class="col-md-4">
+            <label>Last Name</label>
+            <input type="text" th:field="*{lastName}" class="form-control"/>
+        </div>
+        <div class="col-md-4">
+            <label>Email</label>
+            <input type="email" th:field="*{email}" class="form-control" required/>
+        </div>
+        <div class="col-12">
+            <button class="btn btn-primary">Update Profile</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>
