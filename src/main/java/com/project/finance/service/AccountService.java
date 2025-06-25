@@ -1,4 +1,3 @@
-// service/AccountService.java
 package com.project.finance.service;
 
 import com.project.finance.model.Account;
@@ -11,7 +10,6 @@ import java.util.Optional;
 
 @Service
 public class AccountService {
-
     @Autowired
     private AccountRepository accountRepository;
 

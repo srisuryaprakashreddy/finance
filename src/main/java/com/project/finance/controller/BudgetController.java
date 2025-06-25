@@ -1,4 +1,3 @@
-// controller/BudgetController.java
 package com.project.finance.controller;
 
 import com.project.finance.model.Budget;
@@ -17,32 +16,27 @@ public class BudgetController {
 
     @Autowired
     private BudgetService budgetService;
-
     @Autowired
     private UserService userService;
 
     @GetMapping
     public String budget(Model model, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
-
         if (user != null) {
             model.addAttribute("budgets", budgetService.getBudgetsByUser(user));
             model.addAttribute("budget", new Budget());
         }
-
         return "budget";
     }
 
     @PostMapping("/add")
     public String addBudget(@ModelAttribute Budget budget, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
-
         if (user != null) {
             budget.setUser(user);
             budget.setSpent(0.0);
             budgetService.saveBudget(budget);
         }
-
         return "redirect:/budget";
     }
 

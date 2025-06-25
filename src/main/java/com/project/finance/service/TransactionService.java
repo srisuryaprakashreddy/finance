@@ -1,4 +1,3 @@
-// service/TransactionService.java (Updated)
 package com.project.finance.service;
 
 import com.project.finance.model.Transactions;
@@ -8,7 +7,6 @@ import com.project.finance.repository.TransactionRepository;
 import com.project.finance.repository.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,15 +19,31 @@ public class TransactionService {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private BudgetService budgetService;
+
     public Transactions saveTransaction(Transactions transaction) {
         Account account = transaction.getAccount();
+        boolean isDebit = "EXPENSE".equals(transaction.getType());
         if ("INCOME".equals(transaction.getType())) {
             account.setBalance(account.getBalance() + transaction.getAmount());
-        } else if ("EXPENSE".equals(transaction.getType())) {
+        } else if (isDebit) {
             account.setBalance(account.getBalance() - transaction.getAmount());
         }
         accountRepository.save(account);
-        return transactionRepository.save(transaction);
+        Transactions saved = transactionRepository.save(transaction);
+
+        // Update budget spent if category is present and not empty
+        if (transaction.getCategory() != null && !transaction.getCategory().isEmpty()) {
+            budgetService.updateSpent(
+                    transaction.getUser(),
+                    transaction.getCategory(),
+                    transaction.getAmount(),
+                    isDebit,
+                    transaction.getDate()
+            );
+        }
+        return saved;
     }
 
     public List<Transactions> getTransactionsByUser(User user) {
@@ -49,26 +63,27 @@ public class TransactionService {
         if (transactionOpt.isPresent()) {
             Transactions transaction = transactionOpt.get();
             Account account = transaction.getAccount();
+            boolean isDebit = "EXPENSE".equals(transaction.getType());
 
-            // Reverse the transaction effect on account balance
+            // Reverse transaction effect on account
             if ("INCOME".equals(transaction.getType())) {
                 account.setBalance(account.getBalance() - transaction.getAmount());
-            } else if ("EXPENSE".equals(transaction.getType())) {
+            } else if (isDebit) {
                 account.setBalance(account.getBalance() + transaction.getAmount());
             }
-
             accountRepository.save(account);
+
+            // Reverse budget spent if category is present and not empty
+            if (transaction.getCategory() != null && !transaction.getCategory().isEmpty()) {
+                budgetService.updateSpent(
+                        transaction.getUser(),
+                        transaction.getCategory(),
+                        transaction.getAmount(),
+                        !isDebit, // Reverse the debit/credit
+                        transaction.getDate()
+                );
+            }
             transactionRepository.deleteById(id);
         }
-    }
-
-    public Double getTotalIncome(User user) {
-        Double income = transactionRepository.sumByUserAndType(user, "INCOME");
-        return income != null ? income : 0.0;
-    }
-
-    public Double getTotalExpenses(User user) {
-        Double expenses = transactionRepository.sumByUserAndType(user, "EXPENSE");
-        return expenses != null ? expenses : 0.0;
     }
 }

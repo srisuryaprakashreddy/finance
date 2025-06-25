@@ -1,4 +1,3 @@
-// controller/UserController.java
 package com.project.finance.controller;
 
 import com.project.finance.model.User;

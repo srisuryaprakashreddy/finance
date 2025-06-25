@@ -1,4 +1,3 @@
-// controller/AccountController.java
 package com.project.finance.controller;
 
 import com.project.finance.model.Account;
@@ -17,31 +16,26 @@ public class AccountController {
 
     @Autowired
     private AccountService accountService;
-
     @Autowired
     private UserService userService;
 
     @GetMapping
     public String accounts(Model model, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
-
         if (user != null) {
             model.addAttribute("accounts", accountService.getAccountsByUser(user));
             model.addAttribute("account", new Account());
         }
-
         return "accounts";
     }
 
     @PostMapping("/add")
     public String addAccount(@ModelAttribute Account account, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
-
         if (user != null) {
             account.setUser(user);
             accountService.saveAccount(account);
         }
-
         return "redirect:/accounts";
     }
 

@@ -1,74 +1,64 @@
-<!-- templates/budget.html -->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Budget</title>
-    <link rel="stylesheet" th:href="@{/static.css}">
+    <title>Budgets</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
 </head>
 <body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="#">Expense Planner</a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" th:href="@{/dashboard}">Dashboard</a>
+            <a class="nav-link" th:href="@{/accounts}">Accounts</a>
+            <a class="nav-link" th:href="@{/transactions}">Transactions</a>
+            <a class="nav-link active" th:href="@{/budget}">Budgets</a>
+            <a class="nav-link" th:href="@{/transfer}">Transfer</a>
+            <a class="nav-link" th:href="@{/user/profile}">Profile</a>
+            <a class="nav-link" th:href="@{/logout}">Logout</a>
+        </div>
+    </div>
+</nav>
 <div class="container">
-    <nav>
-        <ul>
-            <li><a th:href="@{/dashboard}">Dashboard</a></li>
-            <li><a th:href="@{/transactions}">Transactions</a></li>
-            <li><a th:href="@{/budget}">Budget</a></li>
-            <li><a th:href="@{/logout}">Logout</a></li>
-        </ul>
-    </nav>
-
-    <h1>Budget Management</h1>
-
-    <div class="section">
-        <h2>Create New Budget</h2>
-        <form th:action="@{/budget/add}" th:object="${budget}" method="post">
-            <div class="form-group">
-                <label for="category">Category:</label>
-                <input type="text" id="category" th:field="*{category}" required>
+    <h2>Your Budgets</h2>
+    <div class="row">
+        <div class="col-md-4" th:each="b : ${budgets}">
+            <div class="card mb-3 shadow">
+                <div class="card-header" th:text="${b.category}"></div>
+                <div class="card-body">
+                    <div class="progress">
+                        <div class="progress-bar"
+                             role="progressbar"
+                             th:style="'width:' + (${b.spent}/${b.amount}*100) + '%;'"
+                             th:text="${#numbers.formatDecimal(b.spent/b.amount*100, 0, 0)} + '%'"></div>
+                    </div>
+                    <p class="mt-2">Spent: <span th:text="${b.spent}"></span> / <span th:text="${b.amount}"></span></p>
+                    <a th:href="@{'/budget/delete/' + ${b.id}}" class="btn btn-danger btn-sm">Delete</a>
+                </div>
             </div>
-            <div class="form-group">
-                <label for="amount">Budget Amount:</label>
-                <input type="number" step="0.01" id="amount" th:field="*{amount}" required>
-            </div>
-            <div class="form-group">
-                <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" th:field="*{startDate}" required>
-            </div>
-            <div class="form-group">
-                <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" th:field="*{endDate}" required>
-            </div>
-            <button type="submit">Create Budget</button>
-        </form>
+        </div>
+        <div class="col-12" th:if="${#lists.isEmpty(budgets)}">
+            <p class="text-muted text-center">No budgets set yet.</p>
+        </div>
     </div>
-
-    <div class="section">
-        <h2>Current Budgets</h2>
-        <table>
-            <thead>
-            <tr>
-                <th>Category</th>
-                <th>Budget Amount</th>
-                <th>Spent</th>
-                <th>Remaining</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Action</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="budget : ${budgets}">
-                <td th:text="${budget.category}"></td>
-                <td th:text="${budget.amount}"></td>
-                <td th:text="${budget.spent}"></td>
-                <td th:text="${budget.amount - budget.spent}"></td>
-                <td th:text="${budget.startDate}"></td>
-                <td th:text="${budget.endDate}"></td>
-                <td><a th:href="@{/budget/delete/{id}(id=${budget.id})}">Delete</a></td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+    <h3>Add Budget</h3>
+    <form th:action="@{/budget/add}" th:object="${budget}" method="post" class="row g-3">
+        <div class="col-md-3">
+            <input type="text" th:field="*{category}" placeholder="Category" class="form-control" required/>
+        </div>
+        <div class="col-md-3">
+            <input type="number" step="0.01" th:field="*{amount}" placeholder="Amount" class="form-control" required/>
+        </div>
+        <div class="col-md-3">
+            <input type="date" th:field="*{startDate}" class="form-control" required/>
+        </div>
+        <div class="col-md-3">
+            <input type="date" th:field="*{endDate}" class="form-control" required/>
+        </div>
+        <div class="col-12">
+            <button class="btn btn-success">Add Budget</button>
+        </div>
+    </form>
 </div>
 </body>
 </html>

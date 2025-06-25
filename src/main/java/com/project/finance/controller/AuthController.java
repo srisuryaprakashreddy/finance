@@ -1,4 +1,3 @@
-// controller/AuthController.java
 package com.project.finance.controller;
 
 import com.project.finance.model.User;
@@ -27,19 +26,23 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user, RedirectAttributes redirectAttributes) {
+    public String registerUser(@ModelAttribute User user,
+                               @RequestParam String pin,
+                               RedirectAttributes redirectAttributes) {
         if (userService.existsByUsername(user.getUsername())) {
             redirectAttributes.addFlashAttribute("error", "Username already exists");
             return "redirect:/register";
         }
-
         if (userService.existsByEmail(user.getEmail())) {
             redirectAttributes.addFlashAttribute("error", "Email already exists");
             return "redirect:/register";
         }
-
-        userService.registerUser(user);
-        redirectAttributes.addFlashAttribute("success", "Registration successful");
+        if (pin == null || pin.length() != 4 || !pin.matches("\\d{4}")) {
+            redirectAttributes.addFlashAttribute("error", "PIN must be exactly 4 digits");
+            return "redirect:/register";
+        }
+        userService.registerUser(user, pin);
+        redirectAttributes.addFlashAttribute("success", "Registration successful. Please login.");
         return "redirect:/login";
     }
 }
