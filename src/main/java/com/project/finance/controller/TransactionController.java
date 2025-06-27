@@ -1,22 +1,22 @@
 package com.project.finance.controller;
 
+import com.project.finance.model.Account;
 import com.project.finance.model.Transactions;
 import com.project.finance.model.User;
-import com.project.finance.model.Account;
+import com.project.finance.service.AccountService;
 import com.project.finance.service.TransactionService;
 import com.project.finance.service.UserService;
-import com.project.finance.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/transactions")
 public class TransactionController {
-
     @Autowired
     private TransactionService transactionService;
     @Autowired
@@ -33,9 +33,6 @@ public class TransactionController {
                 Account account = accountService.getAccountById(accountId).orElse(null);
                 if (account != null && account.getUser().equals(user)) {
                     model.addAttribute("transactions", transactionService.getTransactionsByAccount(account));
-                    model.addAttribute("selectedAccount", account);
-                } else {
-                    model.addAttribute("transactions", transactionService.getTransactionsByUser(user));
                 }
             } else {
                 model.addAttribute("transactions", transactionService.getTransactionsByUser(user));
@@ -44,8 +41,9 @@ public class TransactionController {
             Transactions newTransaction = new Transactions();
             newTransaction.setDate(LocalDate.now());
             model.addAttribute("transaction", newTransaction);
+            return "transactions";
         }
-        return "transactions";
+        return "redirect:/login";
     }
 
     @PostMapping("/add")

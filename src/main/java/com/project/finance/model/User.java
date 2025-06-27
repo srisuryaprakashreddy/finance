@@ -2,22 +2,21 @@ package com.project.finance.model;
 
 import jakarta.persistence.*;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "users")
 public class User {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
-
+    @Column(nullable = false)
     private String password;
+    @Column(unique = true, nullable = false)
     private String email;
     private String firstName;
     private String lastName;
-
-    // Securely store encoded PIN
     @Column(nullable = false)
     private String pin;
 
@@ -27,7 +26,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Budget> budgets;
 
-    // Getters and setters...
+    // Standard Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getUsername() { return username; }
@@ -46,4 +45,17 @@ public class User {
     public void setAccounts(List<Account> accounts) { this.accounts = accounts; }
     public List<Budget> getBudgets() { return budgets; }
     public void setBudgets(List<Budget> budgets) { this.budgets = budgets; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }

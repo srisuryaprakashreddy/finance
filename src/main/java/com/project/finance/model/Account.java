@@ -8,22 +8,22 @@ import java.util.List;
 public class Account {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String name;
+    private String accountName; // Standardized name
     private Double balance;
-    private String type;
+    private String type; // e.g., SAVINGS, CHECKING
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Transactions> transactions;
 
-    // Getters and setters...
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getAccountName() { return accountName; }
+    public void setAccountName(String accountName) { this.accountName = accountName; }
     public Double getBalance() { return balance; }
     public void setBalance(Double balance) { this.balance = balance; }
     public String getType() { return type; }

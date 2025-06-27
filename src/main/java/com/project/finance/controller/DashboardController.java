@@ -1,20 +1,17 @@
 package com.project.finance.controller;
 
 import com.project.finance.model.User;
-import com.project.finance.model.Account;
-import com.project.finance.service.UserService;
-import com.project.finance.service.AccountService;
-import com.project.finance.service.TransactionService;
-import com.project.finance.service.BudgetService;
+import com.project.finance.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+
+import java.time.LocalDate;
 
 @Controller
 public class DashboardController {
-
     @Autowired
     private UserService userService;
     @Autowired
@@ -24,6 +21,11 @@ public class DashboardController {
     @Autowired
     private BudgetService budgetService;
 
+    @GetMapping("/")
+    public String home() {
+        return "redirect:/dashboard";
+    }
+
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
@@ -32,24 +34,11 @@ public class DashboardController {
             model.addAttribute("accounts", accountService.getAccountsByUser(user));
             model.addAttribute("totalBalance", accountService.getTotalBalance(user));
             model.addAttribute("budgets", budgetService.getBudgetsByUser(user));
-            model.addAttribute("recentTransactions", transactionService.getTransactionsByUser(user));
-            model.addAttribute("newAccount", new Account());
+            model.addAttribute("recentTransactions", transactionService.getRecentTransactions(user, 10));
+            model.addAttribute("totalIncome", transactionService.getTotalIncomeForMonth(user, LocalDate.now()));
+            model.addAttribute("totalExpenses", transactionService.getTotalExpensesForMonth(user, LocalDate.now()));
+            return "dashboard";
         }
-        return "dashboard";
-    }
-
-    @PostMapping("/dashboard/add-account")
-    public String addAccountFromDashboard(@ModelAttribute("newAccount") Account account, Authentication authentication) {
-        User user = userService.findByUsername(authentication.getName()).orElse(null);
-        if (user != null) {
-            account.setUser(user);
-            accountService.saveAccount(account);
-        }
-        return "redirect:/dashboard";
-    }
-
-    @GetMapping("/")
-    public String home() {
-        return "redirect:/dashboard";
+        return "redirect:/login";
     }
 }

@@ -11,19 +11,18 @@ public class Transactions {
     private Double amount;
     private String description;
     private String category;
-    private String type; // INCOME/EXPENSE/TRANSFER
+    private String type; // Standardized to CREDIT/DEBIT
     private LocalDate date;
-    private Boolean isDebit;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Getters and setters...
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Double getAmount() { return amount; }
@@ -36,8 +35,6 @@ public class Transactions {
     public void setType(String type) { this.type = type; }
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }
-    public Boolean getIsDebit() { return isDebit; }
-    public void setIsDebit(Boolean isDebit) { this.isDebit = isDebit; }
     public Account getAccount() { return account; }
     public void setAccount(Account account) { this.account = account; }
     public User getUser() { return user; }

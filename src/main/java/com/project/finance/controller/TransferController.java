@@ -13,7 +13,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/transfer")
 public class TransferController {
-
     @Autowired
     private TransferService transferService;
     @Autowired
@@ -22,9 +21,12 @@ public class TransferController {
     @GetMapping
     public String transferPage(Model model, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
-        model.addAttribute("transfersSent", transferService.getTransfersBySender(user));
-        model.addAttribute("transfersReceived", transferService.getTransfersByReceiver(user));
-        return "transfer";
+        if (user != null) {
+            model.addAttribute("transfersSent", transferService.getTransfersBySender(user));
+            model.addAttribute("transfersReceived", transferService.getTransfersByReceiverEmail(user.getEmail()));
+            return "transfer";
+        }
+        return "redirect:/login";
     }
 
     @PostMapping("/initiate")
@@ -34,11 +36,13 @@ public class TransferController {
                                    Authentication authentication,
                                    RedirectAttributes redirectAttributes) {
         User sender = userService.findByUsername(authentication.getName()).orElse(null);
-        try {
-            transferService.initiateTransfer(sender, receiverEmail, amount, pin);
-            redirectAttributes.addFlashAttribute("success", "Transfer completed successfully.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        if (sender != null) {
+            try {
+                transferService.initiateTransfer(sender, receiverEmail, amount, pin);
+                redirectAttributes.addFlashAttribute("success", "Transfer completed successfully.");
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+            }
         }
         return "redirect:/transfer";
     }

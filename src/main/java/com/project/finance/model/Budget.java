@@ -10,15 +10,15 @@ public class Budget {
     private Long id;
     private String category;
     private Double amount;
-    private Double spent;
+    private Double spent = 0.0; // Default to 0
     private LocalDate startDate;
     private LocalDate endDate;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Getters and setters...
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getCategory() { return category; }
