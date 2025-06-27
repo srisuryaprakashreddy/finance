@@ -11,8 +11,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface TransactionRepository extends JpaRepository<Transactions, Long> {
-    List<Transactions> findByUser(User user);
-    List<Transactions> findByAccount(Account account);
+    List<Transactions> findByUserOrderByDateDesc(User user);
+    List<Transactions> findByAccountOrderByDateDesc(Account account);
 
     @Query("SELECT SUM(t.amount) FROM Transactions t WHERE t.user = :user AND t.category = :category AND t.type = 'DEBIT' AND t.date BETWEEN :startDate AND :endDate")
     Double sumDebitsForBudget(

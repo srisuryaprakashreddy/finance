@@ -17,12 +17,12 @@ public class AuthController {
     private UserService userService;
 
     @GetMapping("/login")
-    public String login() {
+    public String loginPage() {
         return "login";
     }
 
     @GetMapping("/register")
-    public String register(Model model) {
+    public String registerPage(Model model) {
         model.addAttribute("user", new User());
         return "register";
     }
@@ -49,7 +49,7 @@ public class AuthController {
             return "redirect:/register";
         }
         userService.registerUser(user, pin);
-        redirectAttributes.addFlashAttribute("success", "Registration successful. Please login.");
+        redirectAttributes.addFlashAttribute("success", "Registration successful! Please login.");
         return "redirect:/login";
     }
 }

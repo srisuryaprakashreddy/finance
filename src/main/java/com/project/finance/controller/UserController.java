@@ -12,12 +12,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/user")
 public class UserController {
-    @Autowired
-    private UserService userService;
+    @Autowired private UserService userService;
 
     @GetMapping("/profile")
     public String profile(Model model, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
+        if (user == null) return "redirect:/login";
         model.addAttribute("user", user);
         return "profile";
     }

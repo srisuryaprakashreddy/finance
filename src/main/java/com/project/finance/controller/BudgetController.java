@@ -14,10 +14,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/budget")
 public class BudgetController {
-    @Autowired
-    private BudgetService budgetService;
-    @Autowired
-    private UserService userService;
+    @Autowired private BudgetService budgetService;
+    @Autowired private UserService userService;
 
     private void addCommonAttributes(Model model, User user) {
         model.addAttribute("budgets", budgetService.getBudgetsByUser(user));
@@ -26,12 +24,13 @@ public class BudgetController {
     @GetMapping
     public String listBudgets(Model model, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
-        if (user != null) {
-            addCommonAttributes(model, user);
+        if (user == null) return "redirect:/login";
+
+        addCommonAttributes(model, user);
+        if (!model.containsAttribute("budget")) {
             model.addAttribute("budget", new Budget());
-            return "budget";
         }
-        return "redirect:/login";
+        return "budget";
     }
 
     @PostMapping("/add")
@@ -46,7 +45,7 @@ public class BudgetController {
     }
 
     @GetMapping("/edit/{id}")
-    public String showEditBudgetForm(@PathVariable Long id, Model model, Authentication authentication) {
+    public String showEditBudgetForm(@PathVariable Long id, Model model, Authentication authentication, RedirectAttributes redirectAttributes) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
         Budget budget = budgetService.getBudgetById(id).orElse(null);
 
@@ -55,6 +54,7 @@ public class BudgetController {
             addCommonAttributes(model, user);
             return "budget";
         }
+        redirectAttributes.addFlashAttribute("error", "Budget not found or unauthorized.");
         return "redirect:/budget";
     }
 
@@ -63,7 +63,7 @@ public class BudgetController {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
         if (user != null) {
             budget.setUser(user);
-            budget.setId(id);
+            budget.setId(id); // Ensure the ID is set for update
             budgetService.saveBudget(budget);
             redirectAttributes.addFlashAttribute("success", "Budget updated successfully!");
         }
@@ -71,9 +71,13 @@ public class BudgetController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteBudget(@PathVariable Long id) {
-        // Add authorization check here
-        budgetService.deleteBudget(id);
+    public String deleteBudget(@PathVariable Long id, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        budgetService.getBudgetById(id).ifPresent(budget -> {
+            if (user != null && budget.getUser().equals(user)) {
+                budgetService.deleteBudget(id);
+            }
+        });
         return "redirect:/budget";
     }
 }

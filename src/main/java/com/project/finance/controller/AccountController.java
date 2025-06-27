@@ -13,20 +13,17 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/accounts")
 public class AccountController {
-    @Autowired
-    private AccountService accountService;
-    @Autowired
-    private UserService userService;
+    @Autowired private AccountService accountService;
+    @Autowired private UserService userService;
 
     @GetMapping
     public String accounts(Model model, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
-        if (user != null) {
-            model.addAttribute("accounts", accountService.getAccountsByUser(user));
-            model.addAttribute("account", new Account());
-            return "accounts";
-        }
-        return "redirect:/login";
+        if (user == null) return "redirect:/login";
+
+        model.addAttribute("accounts", accountService.getAccountsByUser(user));
+        model.addAttribute("account", new Account());
+        return "accounts";
     }
 
     @PostMapping("/add")
@@ -40,9 +37,13 @@ public class AccountController {
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteAccount(@PathVariable Long id) {
-        // Add authorization check here to ensure user owns the account
-        accountService.deleteAccount(id);
+    public String deleteAccount(@PathVariable Long id, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        accountService.getAccountById(id).ifPresent(account -> {
+            if (user != null && account.getUser().equals(user)) {
+                accountService.deleteAccount(id);
+            }
+        });
         return "redirect:/accounts";
     }
 }

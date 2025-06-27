@@ -19,6 +19,7 @@ public class BudgetService {
 
     public List<Budget> getBudgetsByUser(User user) {
         List<Budget> budgets = budgetRepository.findByUser(user);
+        // For each budget, dynamically calculate the spent amount from transactions.
         budgets.forEach(budget -> {
             Double spent = transactionRepository.sumDebitsForBudget(
                     user, budget.getCategory(), budget.getStartDate(), budget.getEndDate());

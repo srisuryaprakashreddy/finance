@@ -11,7 +11,7 @@ public class Transactions {
     private Double amount;
     private String description;
     private String category;
-    private String type; // Standardized to CREDIT/DEBIT
+    private String type; // CREDIT or DEBIT
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)

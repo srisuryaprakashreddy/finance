@@ -8,15 +8,15 @@ import java.util.List;
 public class Account {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String accountName; // Standardized name
+    private String accountName;
     private Double balance;
-    private String type; // e.g., SAVINGS, CHECKING
+    private String type;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transactions> transactions;
 
     // Getters and Setters

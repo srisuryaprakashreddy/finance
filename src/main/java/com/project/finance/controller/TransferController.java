@@ -13,20 +13,17 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/transfer")
 public class TransferController {
-    @Autowired
-    private TransferService transferService;
-    @Autowired
-    private UserService userService;
+    @Autowired private TransferService transferService;
+    @Autowired private UserService userService;
 
     @GetMapping
     public String transferPage(Model model, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
-        if (user != null) {
-            model.addAttribute("transfersSent", transferService.getTransfersBySender(user));
-            model.addAttribute("transfersReceived", transferService.getTransfersByReceiverEmail(user.getEmail()));
-            return "transfer";
-        }
-        return "redirect:/login";
+        if (user == null) return "redirect:/login";
+
+        model.addAttribute("transfersSent", transferService.getTransfersBySender(user));
+        model.addAttribute("transfersReceived", transferService.getTransfersByReceiverEmail(user.getEmail()));
+        return "transfer";
     }
 
     @PostMapping("/initiate")
@@ -37,6 +34,10 @@ public class TransferController {
                                    RedirectAttributes redirectAttributes) {
         User sender = userService.findByUsername(authentication.getName()).orElse(null);
         if (sender != null) {
+            if (sender.getEmail().equalsIgnoreCase(receiverEmail)) {
+                redirectAttributes.addFlashAttribute("error", "You cannot transfer money to yourself.");
+                return "redirect:/transfer";
+            }
             try {
                 transferService.initiateTransfer(sender, receiverEmail, amount, pin);
                 redirectAttributes.addFlashAttribute("success", "Transfer completed successfully.");

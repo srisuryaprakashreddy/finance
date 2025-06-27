@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TransactionService {
@@ -52,19 +52,17 @@ public class TransactionService {
     }
 
     public List<Transactions> getTransactionsByUser(User user) {
-        return transactionRepository.findByUser(user);
+        return transactionRepository.findByUserOrderByDateDesc(user);
     }
 
     public List<Transactions> getRecentTransactions(User user, int limit) {
-        List<Transactions> allTransactions = transactionRepository.findByUser(user);
-        // Simple sort by date and limit, for production consider a paginated query
-        allTransactions.sort((t1, t2) -> t2.getDate().compareTo(t1.getDate()));
-        return allTransactions.stream().limit(limit).toList();
+        return transactionRepository.findByUserOrderByDateDesc(user).stream()
+                .limit(limit)
+                .collect(Collectors.toList());
     }
 
     public List<Transactions> getTransactionsByAccount(Account account) {
-        if (account == null) return Collections.emptyList();
-        return transactionRepository.findByAccount(account);
+        return transactionRepository.findByAccountOrderByDateDesc(account);
     }
 
     public Optional<Transactions> getTransactionById(Long id) {
@@ -72,12 +70,20 @@ public class TransactionService {
     }
 
     public Double getTotalIncomeForMonth(User user, LocalDate date) {
-        // Implement logic to calculate total income for the current month
-        return 0.0; // Placeholder
+        LocalDate startOfMonth = date.withDayOfMonth(1);
+        LocalDate endOfMonth = date.withDayOfMonth(date.lengthOfMonth());
+        return getTransactionsByUser(user).stream()
+                .filter(t -> "CREDIT".equals(t.getType()) && !t.getDate().isBefore(startOfMonth) && !t.getDate().isAfter(endOfMonth))
+                .mapToDouble(Transactions::getAmount)
+                .sum();
     }
 
     public Double getTotalExpensesForMonth(User user, LocalDate date) {
-        // Implement logic to calculate total expenses for the current month
-        return 0.0; // Placeholder
+        LocalDate startOfMonth = date.withDayOfMonth(1);
+        LocalDate endOfMonth = date.withDayOfMonth(date.lengthOfMonth());
+        return getTransactionsByUser(user).stream()
+                .filter(t -> "DEBIT".equals(t.getType()) && !t.getDate().isBefore(startOfMonth) && !t.getDate().isAfter(endOfMonth))
+                .mapToDouble(Transactions::getAmount)
+                .sum();
     }
 }

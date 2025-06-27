@@ -11,10 +11,10 @@ public class Transfer {
     @ManyToOne
     @JoinColumn(name = "sender_id")
     private User sender;
-    private String receiverEmail; // Store email for history
+    private String receiverEmail;
     private Double amount;
     private LocalDateTime timestamp;
-    private String status; // e.g., COMPLETED, FAILED
+    private String status;
 
     // Getters and Setters
     public Long getId() { return id; }

@@ -10,7 +10,8 @@ public class Budget {
     private Long id;
     private String category;
     private Double amount;
-    private Double spent = 0.0; // Default to 0
+    @Transient // Not stored in DB; calculated on the fly
+    private Double spent = 0.0;
     private LocalDate startDate;
     private LocalDate endDate;
 

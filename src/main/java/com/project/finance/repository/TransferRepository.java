@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface TransferRepository extends JpaRepository<Transfer, Long> {
-    List<Transfer> findBySender(User sender);
-    List<Transfer> findByReceiverEmail(String receiverEmail);
+    List<Transfer> findBySenderOrderByTimestampDesc(User sender);
+    List<Transfer> findByReceiverEmailOrderByTimestampDesc(String receiverEmail);
 }

@@ -32,17 +32,18 @@ public class TransferService {
         User receiver = userRepository.findByEmail(receiverEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Receiver with email " + receiverEmail + " not found."));
 
+        // For simplicity, we use the first account. A real app would let the user choose.
         Account senderAccount = accountRepository.findByUser(sender).stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Sender does not have a bank account."));
+                .orElseThrow(() -> new IllegalStateException("Sender does not have an account."));
 
         if (senderAccount.getBalance() < amount) {
             throw new IllegalStateException("Insufficient balance.");
         }
 
         Account receiverAccount = accountRepository.findByUser(receiver).stream().findFirst()
-                .orElseThrow(() -> new IllegalStateException("Receiver does not have a bank account."));
+                .orElseThrow(() -> new IllegalStateException("Receiver does not have an account."));
 
-        // Create sender debit transaction
+        // Create sender DEBIT transaction
         Transactions senderTx = new Transactions();
         senderTx.setUser(sender);
         senderTx.setAccount(senderAccount);
@@ -51,9 +52,9 @@ public class TransferService {
         senderTx.setDescription("Transfer to " + receiver.getEmail());
         senderTx.setCategory("Transfer");
         senderTx.setDate(LocalDate.now());
-        transactionService.saveTransaction(senderTx);
+        transactionService.saveTransaction(senderTx); // This updates the balance
 
-        // Create receiver credit transaction
+        // Create receiver CREDIT transaction
         Transactions receiverTx = new Transactions();
         receiverTx.setUser(receiver);
         receiverTx.setAccount(receiverAccount);
@@ -62,9 +63,9 @@ public class TransferService {
         receiverTx.setDescription("Transfer from " + sender.getEmail());
         receiverTx.setCategory("Transfer");
         receiverTx.setDate(LocalDate.now());
-        transactionService.saveTransaction(receiverTx);
+        transactionService.saveTransaction(receiverTx); // This updates the balance
 
-        // Log the transfer
+        // Log the transfer event
         Transfer transferLog = new Transfer();
         transferLog.setSender(sender);
         transferLog.setReceiverEmail(receiverEmail);
@@ -75,10 +76,10 @@ public class TransferService {
     }
 
     public List<Transfer> getTransfersBySender(User sender) {
-        return transferRepository.findBySender(sender);
+        return transferRepository.findBySenderOrderByTimestampDesc(sender);
     }
 
     public List<Transfer> getTransfersByReceiverEmail(String email) {
-        return transferRepository.findByReceiverEmail(email);
+        return transferRepository.findByReceiverEmailOrderByTimestampDesc(email);
     }
 }
