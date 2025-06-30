@@ -6,9 +6,92 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Montserrat', Arial, sans-serif; }
-        .navbar-brand { font-family: 'Great Vibes', cursive; }
+        :root {
+            --pp-primary: #6739B7;
+            --pp-secondary: #9B59B6;
+            --pp-accent: #FFB6C1;
+            --pp-bg: #F5F3FF;
+            --pp-text: #2D1457;
+            --pp-success: #34C759;
+            --pp-danger: #FF4B5C;
+        }
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: var(--pp-bg);
+            color: var(--pp-text);
+        }
+        .navbar {
+            background: linear-gradient(90deg, var(--pp-primary), var(--pp-secondary));
+        }
+        .navbar-brand, .nav-link {
+            color: #fff !important;
+        }
+        .navbar-brand {
+            font-family: 'Great Vibes', cursive;
+            font-size: 2rem;
+        }
+        .nav-link.active {
+            font-weight: bold;
+            border-bottom: 2px solid var(--pp-accent);
+        }
+        h2, h4 {
+            color: var(--pp-primary);
+        }
+        .shadow, .shadow-sm {
+            box-shadow: 0 4px 16px 0 rgba(103,57,183,0.08) !important;
+        }
+        .card {
+            border: none;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, var(--pp-primary), var(--pp-accent));
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 0.75rem;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(90deg, var(--pp-secondary), var(--pp-primary));
+            color: #fff;
+        }
+        .alert-success {
+            background: #eafbe7;
+            color: var(--pp-success);
+            border: 1px solid var(--pp-success);
+        }
+        .alert-danger {
+            background: #fff0f3;
+            color: var(--pp-danger);
+            border: 1px solid var(--pp-danger);
+        }
+        input.form-control, select.form-select {
+            border-radius: 0.75rem;
+            border: 1.5px solid var(--pp-primary);
+        }
+        input.form-control:focus, select.form-select:focus {
+            border-color: var(--pp-secondary);
+            box-shadow: 0 0 0 0.2rem rgba(103,57,183,.15);
+        }
+        .bg-body {
+            background: #fff !important;
+        }
+        table.table {
+            background: #fff;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .text-muted {
+            color: #8f8fa6 !important;
+        }
+        .transfer-table-col {
+            margin-bottom: 2rem;
+        }
         @media (max-width: 767px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
             .transfer-table-col {
                 margin-bottom: 2rem;
             }
@@ -16,7 +99,7 @@
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+<nav class="navbar navbar-expand-lg mb-4">
     <div class="container">
         <a class="navbar-brand" href="#">B&E Planner</a>
         <div class="navbar-nav ms-auto">
@@ -71,7 +154,7 @@
                     <td th:text="${t.completed ? 'Completed' : 'Pending'}"></td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(transfersSent)}">
-                    <td colspan="4" class="text-center">No transfers sent yet.</td>
+                    <td colspan="4" class="text-center text-muted">No transfers sent yet.</td>
                 </tr>
                 </tbody>
             </table>
@@ -90,7 +173,7 @@
                     <td th:text="${t.completed ? 'Completed' : 'Pending'}"></td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(transfersReceived)}">
-                    <td colspan="4" class="text-center">No transfers received yet.</td>
+                    <td colspan="4" class="text-center text-muted">No transfers received yet.</td>
                 </tr>
                 </tbody>
             </table>
