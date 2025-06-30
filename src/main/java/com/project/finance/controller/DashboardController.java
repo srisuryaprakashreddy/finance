@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 public class DashboardController {
 
@@ -24,18 +26,21 @@ public class DashboardController {
     @Autowired
     private BudgetService budgetService;
 
+    // Main dashboard with all user data and accounts
     @GetMapping("/dashboard")
     public String dashboard(Model model, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
         if (user != null) {
+            // All accounts for the user
+            List<Account> accounts = accountService.getAccountsByUser(user);
             model.addAttribute("user", user);
-            model.addAttribute("accounts", accountService.getAccountsByUser(user));
+            model.addAttribute("accounts", accounts);
             model.addAttribute("totalBalance", accountService.getTotalBalance(user));
             model.addAttribute("budgets", budgetService.getBudgetsByUser(user));
             model.addAttribute("recentTransactions", transactionService.getTransactionsByUser(user));
             model.addAttribute("newAccount", new Account());
 
-            // Calculate and add total income and total expenses
+            // Calculate total income and total expenses
             double totalIncome = transactionService.getTransactionsByUser(user).stream()
                     .filter(t -> "INCOME".equalsIgnoreCase(t.getType()))
                     .mapToDouble(t -> t.getAmount())
@@ -52,6 +57,28 @@ public class DashboardController {
         return "dashboard";
     }
 
+    // Dedicated page to show all accounts (optional)
+    @GetMapping("/dashboard/accounts")
+    public String showAllAccounts(Model model, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        if (user != null) {
+            model.addAttribute("accounts", accountService.getAccountsByUser(user));
+        }
+        return "dashboard-accounts"; // Create a Thymeleaf template named dashboard-accounts.html
+    }
+
+    // REST API endpoint to get all accounts as JSON (optional)
+    @GetMapping("/api/dashboard/accounts")
+    @ResponseBody
+    public List<Account> getAllAccounts(Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        if (user != null) {
+            return accountService.getAccountsByUser(user);
+        }
+        return List.of();
+    }
+
+    // Add new account from dashboard
     @PostMapping("/dashboard/add-account")
     public String addAccountFromDashboard(@ModelAttribute("newAccount") Account account, Authentication authentication) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
@@ -62,6 +89,7 @@ public class DashboardController {
         return "redirect:/dashboard";
     }
 
+    // Home redirects to dashboard
     @GetMapping("/")
     public String home() {
         return "redirect:/dashboard";
