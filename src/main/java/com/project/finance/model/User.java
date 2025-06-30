@@ -46,4 +46,6 @@ public class User {
     public void setAccounts(List<Account> accounts) { this.accounts = accounts; }
     public List<Budget> getBudgets() { return budgets; }
     public void setBudgets(List<Budget> budgets) { this.budgets = budgets; }
+
+
 }
