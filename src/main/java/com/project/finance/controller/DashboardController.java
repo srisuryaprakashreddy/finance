@@ -34,6 +34,20 @@ public class DashboardController {
             model.addAttribute("budgets", budgetService.getBudgetsByUser(user));
             model.addAttribute("recentTransactions", transactionService.getTransactionsByUser(user));
             model.addAttribute("newAccount", new Account());
+
+            // Calculate and add total income and total expenses
+            double totalIncome = transactionService.getTransactionsByUser(user).stream()
+                    .filter(t -> "INCOME".equalsIgnoreCase(t.getType()))
+                    .mapToDouble(t -> t.getAmount())
+                    .sum();
+
+            double totalExpenses = transactionService.getTransactionsByUser(user).stream()
+                    .filter(t -> "EXPENSE".equalsIgnoreCase(t.getType()))
+                    .mapToDouble(t -> t.getAmount())
+                    .sum();
+
+            model.addAttribute("totalIncome", totalIncome);
+            model.addAttribute("totalExpenses", totalExpenses);
         }
         return "dashboard";
     }

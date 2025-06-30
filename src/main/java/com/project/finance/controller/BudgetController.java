@@ -45,4 +45,33 @@ public class BudgetController {
         budgetService.deleteBudget(id);
         return "redirect:/budget";
     }
+    @GetMapping("/edit/{id}")
+    public String showEditBudgetForm(@PathVariable Long id, Model model, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        Budget budget = budgetService.getBudgetById(id);
+        // Optional: check if the budget belongs to the current user
+        if (budget != null && user != null && budget.getUser().getId().equals(user.getId())) {
+            model.addAttribute("budget", budget);
+            model.addAttribute("budgets", budgetService.getBudgetsByUser(user));
+            model.addAttribute("editMode", true);
+            return "budget";
+        }
+        return "redirect:/budget";
+    }
+
+    // Handle the update POST
+    @PostMapping("/update")
+    public String updateBudget(@ModelAttribute Budget budget, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        if (user != null) {
+            budget.setUser(user);
+            // Optionally: preserve the 'spent' field if not changed in the form
+            Budget existing = budgetService.getBudgetById(budget.getId());
+            if(existing != null) {
+                budget.setSpent(existing.getSpent());
+            }
+            budgetService.saveBudget(budget);
+        }
+        return "redirect:/budget";
+    }
 }

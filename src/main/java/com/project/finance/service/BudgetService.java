@@ -63,4 +63,8 @@ public class BudgetService {
     public void deleteBudget(Long id) {
         budgetRepository.deleteById(id);
     }
+
+    public Budget getBudgetById(Long id) {
+        return budgetRepository.findById(id).get();
+    }
 }
