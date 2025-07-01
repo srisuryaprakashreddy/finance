@@ -2,9 +2,11 @@ package com.project.finance.controller;
 
 import com.project.finance.model.User;
 import com.project.finance.model.Account;
+import com.project.finance.model.Transactions;
 import com.project.finance.service.TransferService;
 import com.project.finance.service.UserService;
 import com.project.finance.service.AccountService;
+import com.project.finance.service.TransactionService;
 import com.project.finance.service.EmailService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 
@@ -27,6 +30,8 @@ public class TransferController {
     private UserService userService;
     @Autowired
     private AccountService accountService;
+    @Autowired
+    private TransactionService transactionService;
     @Autowired
     private EmailService emailService;
 
@@ -108,8 +113,37 @@ public class TransferController {
 
         try {
             Account senderAccount = accountService.getAccountById(transferData.getAccountId()).orElseThrow(() -> new RuntimeException("Account not found"));
-            // PIN already validated, so pass null and skip PIN check in service
+            // Actually perform the transfer
+            User receiver = userService.findByEmail(transferData.getReceiverEmail()).orElse(null);
+            if (receiver == null) throw new RuntimeException("Receiver not found.");
+            Account receiverAccount = accountService.getMainAccountForUser(receiver); // You may need to implement this logic
+
+            // 1. Perform the transfer using your service
             transferService.initiateTransfer(sender, senderAccount, transferData.getReceiverEmail(), transferData.getAmount(), null);
+
+            // 2. Add transaction for sender (EXPENSE)
+            Transactions senderTx = new Transactions();
+            senderTx.setUser(sender);
+            senderTx.setAccount(senderAccount);
+            senderTx.setDate(LocalDate.now());
+            senderTx.setDescription("Transfer to " + transferData.getReceiverEmail());
+            senderTx.setCategory("Transfer Sent");
+            senderTx.setType("EXPENSE");
+            senderTx.setAmount(transferData.getAmount());
+            transactionService.saveTransaction(senderTx);
+
+            // 3. Add transaction for receiver (INCOME)
+            if (receiverAccount != null) {
+                Transactions receiverTx = new Transactions();
+                receiverTx.setUser(receiver);
+                receiverTx.setAccount(receiverAccount);
+                receiverTx.setDate(LocalDate.now());
+                receiverTx.setDescription("Transfer from " + sender.getEmail());
+                receiverTx.setCategory("Transfer Received");
+                receiverTx.setType("INCOME");
+                receiverTx.setAmount(transferData.getAmount());
+                transactionService.saveTransaction(receiverTx);
+            }
 
             // Clear session attributes
             session.removeAttribute(SESSION_OTP);

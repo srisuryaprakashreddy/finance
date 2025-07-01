@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Controller
 @RequestMapping("/transactions")
@@ -29,17 +30,19 @@ public class TransactionController {
                                @RequestParam(required = false) Long accountId) {
         User user = userService.findByUsername(authentication.getName()).orElse(null);
         if (user != null) {
+            List<Transactions> transactionList;
             if (accountId != null) {
                 Account account = accountService.getAccountById(accountId).orElse(null);
                 if (account != null && account.getUser().equals(user)) {
-                    model.addAttribute("transactions", transactionService.getTransactionsByAccount(account));
+                    transactionList = transactionService.getTransactionsByAccount(account);
                     model.addAttribute("selectedAccount", account);
                 } else {
-                    model.addAttribute("transactions", transactionService.getTransactionsByUser(user));
+                    transactionList = transactionService.getTransactionsByUser(user);
                 }
             } else {
-                model.addAttribute("transactions", transactionService.getTransactionsByUser(user));
+                transactionList = transactionService.getTransactionsByUser(user);
             }
+            model.addAttribute("transactions", transactionList);
             model.addAttribute("accounts", accountService.getAccountsByUser(user));
             Transactions newTransaction = new Transactions();
             newTransaction.setDate(LocalDate.now());

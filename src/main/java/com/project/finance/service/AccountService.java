@@ -34,4 +34,19 @@ public class AccountService {
                 .mapToDouble(Account::getBalance)
                 .sum();
     }
+
+    public Account getMainAccountForUser(User receiver) {
+        List<Account> accounts = accountRepository.findByUser(receiver);
+        if (accounts == null || accounts.isEmpty()) {
+            return null;
+        }
+        // Example: prefer a "Savings" account if present
+        for (Account acc : accounts) {
+            if ("Savings".equalsIgnoreCase(acc.getType())) {
+                return acc;
+            }
+        }
+        // Otherwise, return the first account
+        return accounts.get(0);
+    }
 }
