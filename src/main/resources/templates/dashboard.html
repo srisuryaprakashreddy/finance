@@ -82,6 +82,29 @@
             font-size: 1.5rem;
             font-weight: 700;
         }
+        .account-block-card {
+            background: var(--groww-card);
+            border-radius: 1.1rem;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+            padding: 1.2rem 1rem 1rem 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            min-height: 170px;
+        }
+        .account-block-card .acc-title {
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: var(--groww-primary);
+        }
+        .account-block-card .acc-meta {
+            color: var(--groww-muted);
+            font-size: 0.97rem;
+        }
+        .account-block-card .acc-balance {
+            font-size: 1.18rem;
+            font-weight: 600;
+            margin-top: 0.7rem;
+        }
         .table {
             background: var(--groww-card);
             border-radius: 1rem;
@@ -177,10 +200,26 @@
             </div>
         </div>
     </div>
-    <!-- Chart Row -->
-    <div class="groww-card">
-        <canvas id="balanceChart" height="60"></canvas>
+
+    <!-- Account Details Blocks -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3" th:each="a : ${accounts}">
+            <div class="account-block-card">
+                <div class="acc-title" th:text="${a.name}">Account Name</div>
+                <div class="acc-meta" th:text="'Type: ' + ${a.type}">Type</div>
+                <div class="acc-meta" th:text="'ID: ' + ${a.id}">ID</div>
+                <div class="acc-balance">₹ <span th:text="${a.balance}">0.0</span></div>
+            </div>
+        </div>
+        <div class="col-12" th:if="${#lists.isEmpty(accounts)}">
+            <p class="text-muted text-center">No accounts found.</p>
+        </div>
     </div>
+
+    <!-- Chart Row -->
+<!--    <div class="groww-card">-->
+<!--        <canvas id="balanceChart" height="60"></canvas>-->
+<!--    </div>-->
     <h4 class="mt-4 mb-3" style="color:var(--groww-primary); font-weight:600;">Recent Transactions</h4>
     <div class="groww-card p-0">
         <table class="table table-striped table-hover mb-0">
