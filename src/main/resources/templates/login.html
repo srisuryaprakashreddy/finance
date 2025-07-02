@@ -1,22 +1,132 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Login - Expense Planner</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}" />
+    <title>Login | Groww Inspired</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Montserrat font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --groww-primary: #00d09c;
+            --groww-accent: #2ee59d;
+            --groww-bg: #f8f9fa;
+            --groww-card: #fff;
+            --groww-text: #232323;
+            --groww-muted: #6c757d;
+            --groww-danger: #ff4b5c;
+        }
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: var(--groww-bg);
+            color: var(--groww-text);
+            min-height: 100vh;
+        }
+        .brand-header {
+            font-weight: bold;
+            font-size: 2.2rem;
+            color: var(--groww-primary);
+            text-align: center;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+        .login-card {
+            border: none;
+            border-radius: 1.2rem;
+            box-shadow: 0 4px 24px 0 rgba(0,208,156,0.10);
+            background: var(--groww-card);
+            overflow: hidden;
+        }
+        .login-card .card-body {
+            padding: 2rem 2rem 1.5rem 2rem;
+        }
+        h2 {
+            color: var(--groww-primary);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .btn-groww {
+            background: linear-gradient(90deg, var(--groww-primary), var(--groww-accent));
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            border-radius: 0.75rem;
+            transition: box-shadow 0.2s;
+        }
+        .btn-groww:hover {
+            background: linear-gradient(90deg, var(--groww-accent), var(--groww-primary));
+            box-shadow: 0 2px 8px 0 rgba(0,208,156,0.12);
+        }
+        input.form-control {
+            border-radius: 0.75rem;
+            border: 1.5px solid #e3e3e3;
+            background: #f9f9f9;
+        }
+        input.form-control:focus {
+            border-color: var(--groww-primary);
+            box-shadow: 0 0 0 0.1rem rgba(0,208,156,.12);
+        }
+        .alert-danger {
+            background: var(--groww-danger);
+            color: #fff;
+            border: none;
+            border-radius: 0.75rem;
+        }
+        .alert-info {
+            background: var(--groww-accent);
+            color: var(--groww-primary);
+            border: none;
+            border-radius: 0.75rem;
+        }
+        a {
+            color: var(--groww-primary);
+            font-weight: 500;
+            text-decoration: none;
+        }
+        a:hover {
+            color: var(--groww-accent);
+            text-decoration: underline;
+        }
+        @media (max-width: 767px) {
+            .brand-header {
+                font-size: 1.6rem;
+            }
+            .login-card .card-body {
+                padding: 1.5rem 1rem 1rem 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<h2>Login</h2>
-
-<div th:if="${error}" style="color:red;">
-    <p th:text="${error}"></p>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5 col-lg-4">
+            <div class="brand-header">B&E Planner</div>
+            <div class="card login-card shadow">
+                <div class="card-body">
+                    <h2>Login</h2>
+                    <form th:action="@{/login}" method="post">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-control" required/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control" required/>
+                        </div>
+                        <button class="btn btn-groww w-100">Login</button>
+                    </form>
+                    <div class="mt-2 text-center">
+                        <a th:href="@{/register}">Register</a>
+                    </div>
+                    <div th:if="${param.error}" class="alert alert-danger mt-2">Invalid credentials</div>
+                    <div th:if="${param.logout}" class="alert alert-info mt-2">Logged out</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
-<form th:action="@{/login}" method="post">
-    <input type="text" name="username" placeholder="Username" required/><br/>
-    <input type="password" name="password" placeholder="Password" required/><br/>
-    <button type="submit">Login</button>
-</form>
-
-<p>New user? <a th:href="@{/register}">Register here</a></p>
 </body>
 </html>

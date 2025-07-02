@@ -1,15 +1,310 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Dashboard</title>
+    <title>Dashboard | Groww Inspired</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Montserrat font -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --groww-primary: #00d09c;
+            --groww-secondary: #1b2124;
+            --groww-bg: #f8f9fa;
+            --groww-card: #fff;
+            --groww-text: #232323;
+            --groww-muted: #6c757d;
+            --groww-accent: #2ee59d;
+            --groww-danger: #ff4b5c;
+        }
+        body {
+            font-family: 'Montserrat', Arial, sans-serif;
+            background: var(--groww-bg);
+            color: var(--groww-text);
+        }
+        .navbar {
+            background: var(--groww-card);
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+        }
+        .navbar-brand {
+            color: var(--groww-primary) !important;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+        .nav-link {
+            color: var(--groww-secondary) !important;
+            font-weight: 500;
+            margin-right: 1rem;
+            border-radius: 0.5rem;
+            transition: background 0.2s;
+        }
+        .nav-link.active, .nav-link:hover {
+            background: rgba(0,208,156,0.1);
+            color: var(--groww-primary) !important;
+        }
+        .groww-card {
+            background: var(--groww-card);
+            border-radius: 1.25rem;
+            box-shadow: 0 4px 24px 0 rgba(0,0,0,0.07);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .dashboard-card {
+            border-radius: 1.25rem;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.07);
+            background: var(--groww-card);
+            margin-bottom: 2rem;
+            padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+            border: none;
+            transition: box-shadow 0.2s;
+        }
+        .dashboard-card-primary {
+            background: linear-gradient(135deg, var(--groww-primary), var(--groww-accent));
+            color: #fff;
+        }
+        .dashboard-card-success {
+            background: var(--groww-primary);
+            color: #fff;
+        }
+        .dashboard-card-danger {
+            background: var(--groww-danger);
+            color: #fff;
+        }
+        .dashboard-card .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        .dashboard-card .card-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .account-block-card {
+            background: var(--groww-card);
+            border-radius: 1.1rem;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.04);
+            padding: 1.2rem 1rem 1rem 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            min-height: 170px;
+        }
+        .account-block-card .acc-title {
+            font-size: 1.08rem;
+            font-weight: 700;
+            color: var(--groww-primary);
+        }
+        .account-block-card .acc-meta {
+            color: var(--groww-muted);
+            font-size: 0.97rem;
+        }
+        .account-block-card .acc-balance {
+            font-size: 1.18rem;
+            font-weight: 600;
+            margin-top: 0.7rem;
+        }
+        .table {
+            background: var(--groww-card);
+            border-radius: 1rem;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .table-striped > tbody > tr:nth-of-type(odd) {
+            background-color: #f4fdf9;
+        }
+        .progress {
+            height: 0.85rem;
+            background: #eafaf5;
+            border-radius: 0.75rem;
+            margin-bottom: 0.7rem;
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, var(--groww-primary), var(--groww-accent));
+            border-radius: 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .budget-card {
+            border-radius: 1.25rem;
+            box-shadow: 0 2px 8px 0 rgba(0,0,0,0.07);
+            background: var(--groww-card);
+            margin-bottom: 2rem;
+            padding: 1.2rem 1rem 1rem 1rem;
+            border: none;
+        }
+        .budget-category {
+            font-weight: 700;
+            color: var(--groww-primary);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        .budget-info {
+            font-size: 0.98rem;
+            color: var(--groww-muted);
+            margin-bottom: 0.25rem;
+        }
+        @media (max-width: 767px) {
+            .groww-card { padding: 1rem; }
+            .navbar-brand { font-size: 1.2rem; }
+            .dashboard-card, .budget-card { padding: 1rem; }
+        }
+    </style>
 </head>
 <body>
-<h2>Welcome, <span th:text="${user.name}">User</span></h2>
-<div>
-    <p>Account Balance: ₹<span th:text="${account.balance}">0</span></p>
-    <p>Budget Remaining: ₹<span th:text="${budget.remainingBudget}">0</span></p>
-    <a th:href="@{/budget}">Set Budget</a> |
-    <a th:href="@{/transactions}">View Transactions</a>
+<nav class="navbar navbar-expand-lg mb-4">
+    <div class="container">
+        <a class="navbar-brand" href="#">B&E Planner</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#growwNav" aria-controls="growwNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="growwNav">
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link active" th:href="@{/dashboard}">Dashboard</a>
+                <a class="nav-link" th:href="@{/accounts}">Accounts</a>
+                <a class="nav-link" th:href="@{/transactions}">Transactions</a>
+                <a class="nav-link" th:href="@{/budget}">Budgets</a>
+                <a class="nav-link" th:href="@{/transfer}">Transfer</a>
+                <a class="nav-link" th:href="@{/user/profile}">Profile</a>
+                <a class="nav-link" th:href="@{/logout}">Logout</a>
+            </div>
+        </div>
+    </div>
+</nav>
+<div class="container">
+    <h2 class="mb-4" style="color:var(--groww-primary); font-weight:700;">
+        Welcome, <span th:text="${user != null ? user.firstName : 'User'}">User</span>!
+    </h2>
+    <!-- Cards Row: Total Balance, Income, Expenses -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="dashboard-card dashboard-card-primary shadow">
+                <div class="card-title">Total Balance</div>
+                <div class="card-text" th:text="${totalBalance != null ? totalBalance : 0.0}">0.0</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card dashboard-card-success shadow">
+                <div class="card-title">Total Income</div>
+                <div class="card-text" th:text="${totalIncome != null ? totalIncome : 0.0}">0.0</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="dashboard-card dashboard-card-danger shadow">
+                <div class="card-title">Total Expenses</div>
+                <div class="card-text" th:text="${totalExpenses != null ? totalExpenses : 0.0}">0.0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Details Blocks -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3" th:each="a : ${accounts}">
+            <div class="account-block-card">
+                <div class="acc-title" th:text="${a.name}">Account Name</div>
+                <div class="acc-meta" th:text="'Type: ' + ${a.type}">Type</div>
+                <div class="acc-meta" th:text="'ID: ' + ${a.id}">ID</div>
+                <div class="acc-balance">₹ <span th:text="${a.balance}">0.0</span></div>
+            </div>
+        </div>
+        <div class="col-12" th:if="${#lists.isEmpty(accounts)}">
+            <p class="text-muted text-center">No accounts found.</p>
+        </div>
+    </div>
+
+    <!-- Chart Row -->
+<!--    <div class="groww-card">-->
+<!--        <canvas id="balanceChart" height="60"></canvas>-->
+<!--    </div>-->
+    <h4 class="mt-4 mb-3" style="color:var(--groww-primary); font-weight:600;">Recent Transactions</h4>
+    <div class="groww-card p-0">
+        <table class="table table-striped table-hover mb-0">
+            <thead>
+            <tr>
+                <th>Date</th><th>Description</th><th>Category</th><th>Amount</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="t : ${recentTransactions}">
+                <td th:text="${t.date}"></td>
+                <td th:text="${t.description}"></td>
+                <td th:text="${t.category}"></td>
+                <td th:text="${t.amount}"></td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(recentTransactions)}">
+                <td colspan="4" class="text-center text-muted">No transactions yet.</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <h4 class="mt-4 mb-3" style="color:var(--groww-primary); font-weight:600;">Budgets</h4>
+    <div class="row">
+        <div class="col-md-4" th:each="b : ${budgets}">
+            <div class="budget-card">
+                <div class="budget-category" th:text="${b.category}"></div>
+                <div class="progress">
+                    <div class="progress-bar"
+                         role="progressbar"
+                         th:style="'width:' + (${b.spent}/${b.amount}*100) + '%;'"
+                         th:text="${#numbers.formatDecimal(b.spent/b.amount*100, 0, 0)} + '%'"></div>
+                </div>
+                <div class="budget-info">
+                    Spent: <span style="font-weight:600;" th:text="${b.spent}"></span> /
+                    <span th:text="${b.amount}"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-12" th:if="${#lists.isEmpty(budgets)}">
+            <p class="text-muted text-center">No budgets set yet.</p>
+        </div>
+    </div>
 </div>
+<script th:inline="javascript">
+    /*<![CDATA[*/
+        var accountNames = [
+            /*[# th:each="a, aStat : ${accounts}"]*/
+                /*[['${a.name}']]*/[[${aStat.last ? '' : ','}]]
+            /*[/]*/
+        ];
+        var accountBalances = [
+            /*[# th:each="a, aStat : ${accounts}"]*/
+                [[${a.balance}]] [[${aStat.last ? '' : ','}]]
+            /*[/]*/
+        ];
+        var ctx = document.getElementById('balanceChart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: accountNames,
+                datasets: [{
+                    label: 'Account Balances',
+                    data: accountBalances,
+                    backgroundColor: 'rgba(0,208,156,0.6)' // Groww green
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#232323'
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: { color: '#232323' }
+                    },
+                    y: {
+                        ticks: { color: '#232323' }
+                    }
+                }
+            }
+        });
+    /*]]>*/
+</script>
 </body>
 </html>

@@ -1,70 +1,35 @@
 package com.project.finance.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
+@Table(name = "accounts")
 public class Account {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private String accountName;
-    private double balance;
+    private String name;
+    private Double balance;
+    private String type;
 
     @ManyToOne
-    private User user;  // Assuming one User can have multiple accounts
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    public Account() {
-    }
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Transactions> transactions;
 
-    public Account(String accountName, double balance, User user) {
-        this.accountName = accountName;
-        this.balance = balance;
-        this.user = user;
-    }
-
-    public Account(Long id, String accountName, double balance, User user) {
-        this.id = id;
-        this.accountName = accountName;
-        this.balance = balance;
-        this.user = user;
-    }
-
-    // Getters and setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getAccountName() {
-        return accountName;
-    }
-
-    public void setAccountName(String accountName) {
-        this.accountName = accountName;
-    }
-
-    public double getBalance() {
-        return balance;
-    }
-
-    public void setBalance(double balance) {
-        this.balance = balance;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
+    // Getters and setters...
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public Double getBalance() { return balance; }
+    public void setBalance(Double balance) { this.balance = balance; }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+    public List<Transactions> getTransactions() { return transactions; }
+    public void setTransactions(List<Transactions> transactions) { this.transactions = transactions; }
 }

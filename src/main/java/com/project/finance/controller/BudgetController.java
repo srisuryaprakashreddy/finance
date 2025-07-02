@@ -1,14 +1,14 @@
 package com.project.finance.controller;
 
 import com.project.finance.model.Budget;
+import com.project.finance.model.User;
 import com.project.finance.service.BudgetService;
 import com.project.finance.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
 
 @Controller
 @RequestMapping("/budget")
@@ -16,36 +16,62 @@ public class BudgetController {
 
     @Autowired
     private BudgetService budgetService;
-
     @Autowired
     private UserService userService;
 
-    // Display budget form with userId as query parameter
     @GetMapping
-    public String showBudgetForm(@RequestParam("userId") Long userId, Model model) {
-        Budget budget = budgetService.getBudgetByUserId(userId);
-        if (budget == null) {
-            budget = new Budget(); // new budget object if none found
+    public String budget(Model model, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        if (user != null) {
+            model.addAttribute("budgets", budgetService.getBudgetsByUser(user));
+            model.addAttribute("budget", new Budget());
         }
-
-        model.addAttribute("budget", budget);
-        model.addAttribute("userId", userId);
-        return "budgetForm"; // Thymeleaf form view
+        return "budget";
     }
 
-    // Save or update budget and redirect to dashboard with userId
-    @PostMapping
-    public String saveBudget(@RequestParam("userId") Long userId,
-                             @RequestParam("budgetAmount") double budgetAmount,
-                             @RequestParam("startDate") String startDate,
-                             @RequestParam("endDate") String endDate) {
+    @PostMapping("/add")
+    public String addBudget(@ModelAttribute Budget budget, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        if (user != null) {
+            budget.setUser(user);
+            budget.setSpent(0.0);
+            budgetService.saveBudget(budget);
+        }
+        return "redirect:/budget";
+    }
 
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
+    @GetMapping("/delete/{id}")
+    public String deleteBudget(@PathVariable Long id) {
+        budgetService.deleteBudget(id);
+        return "redirect:/budget";
+    }
+    @GetMapping("/edit/{id}")
+    public String showEditBudgetForm(@PathVariable Long id, Model model, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        Budget budget = budgetService.getBudgetById(id);
+        // Optional: check if the budget belongs to the current user
+        if (budget != null && user != null && budget.getUser().getId().equals(user.getId())) {
+            model.addAttribute("budget", budget);
+            model.addAttribute("budgets", budgetService.getBudgetsByUser(user));
+            model.addAttribute("editMode", true);
+            return "budget";
+        }
+        return "redirect:/budget";
+    }
 
-        budgetService.createOrUpdateBudget(userId, budgetAmount, start, end);
-
-        // Redirect back to dashboard, maintaining userId in query
-        return "redirect:/dashboard?userId=" + userId;
+    // Handle the update POST
+    @PostMapping("/update")
+    public String updateBudget(@ModelAttribute Budget budget, Authentication authentication) {
+        User user = userService.findByUsername(authentication.getName()).orElse(null);
+        if (user != null) {
+            budget.setUser(user);
+            // Optionally: preserve the 'spent' field if not changed in the form
+            Budget existing = budgetService.getBudgetById(budget.getId());
+            if(existing != null) {
+                budget.setSpent(existing.getSpent());
+            }
+            budgetService.saveBudget(budget);
+        }
+        return "redirect:/budget";
     }
 }
